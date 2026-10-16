@@ -123,7 +123,7 @@ sub-band allows. The paper's limitations section discusses each assumption.
 
 See `CITATION.cff`, or cite the archive: Andra, L. S., Ryan, B., Bondada, S., Goluguri, V. S., Andra, L. S. (2026).
 *Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments.* Zenodo. doi:10.5281/zenodo.23424369 (all versions).
-The paper's results come from v1.1.0, doi:10.5281/zenodo.23425661.
+The paper cites v1.1.1, doi:10.5281/zenodo.23426958.
 
 ## Responsible use
 
