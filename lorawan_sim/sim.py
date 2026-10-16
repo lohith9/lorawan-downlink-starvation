@@ -28,12 +28,13 @@ from .config import SimConfig
 from .schedulers import DownlinkRequest, make_scheduler
 
 RX1, RX2 = "rx1", "rx2"
+RX1B = "rx1b"   # RX1 replies to uplinks in the 865-868 MHz sub-band (8-channel plan only)
 JOIN_REQUEST_BYTES = 23   # MHDR(1) JoinEUI(8) DevEUI(8) DevNonce(2) MIC(4)
 
 
 class Packet:
     __slots__ = ("dev", "ch", "sf", "rssi", "t0", "t1", "toa", "lost", "locked",
-                 "confirmed", "mac", "join", "msg", "attack", "lost_g", "rx_g", "heard")
+                 "confirmed", "mac", "join", "msg", "attack", "lost_g", "rx_g", "heard", "band1")
 
 
 class Msg:
@@ -69,14 +70,19 @@ class Gateway:
         self.sim = sim
         self.idx, self.x, self.y = idx, x, y
         c = sim.cfg
-        self.budget = {RX1: c.dc_rx1_band * 3600.0, RX2: c.dc_rx2_band * 3600.0}
-        self.log = {RX1: deque(), RX2: deque()}
-        self.sum = {RX1: 0.0, RX2: 0.0}
-        self.tsum = {RX1: defaultdict(float), RX2: defaultdict(float)}
+        bands = [RX1, RX2] + ([RX1B] if c.channel_plan == "8ch" else [])
+        self.budget = {b: (c.dc_rx2_band if b == RX2 else c.dc_rx1_band) * 3600.0 for b in bands}
+        self.log = {b: deque() for b in bands}
+        self.sum = {b: 0.0 for b in bands}
+        self.tsum = {b: defaultdict(float) for b in bands}
         self.tx = []                   # list of (start, end)
         self.airtime_by = defaultdict(float)
         self.onair = defaultdict(list) # (ch, sf) -> packets
         self.locked = []
+
+    def _k(self, band):
+        """Budget key for a receive window: RX1 replies use the sub-band of the uplink being answered."""
+        return self.sim.cur_rx1_band if band == RX1 else band
 
     def _prune(self, band, t):
         lg = self.log[band]
@@ -86,10 +92,12 @@ class Gateway:
             self.tsum[band][tenant] -= toa
 
     def usage(self, band, t):
+        band = self._k(band)
         self._prune(band, t)
         return self.sum[band]
 
     def tenant_usage(self, band, tenant, t):
+        band = self._k(band)
         self._prune(band, t)
         return self.tsum[band][tenant]
 
@@ -100,17 +108,21 @@ class Gateway:
         return False
 
     def remaining(self, band, t):
-        return self.budget[band] - self.usage(band, t)
+        return self.budget[self._k(band)] - self.usage(band, t)
+
+    def band_budget(self, band):
+        return self.budget[self._k(band)]
 
     def can_send(self, band, t, toa):
-        if self.usage(band, t) + toa > self.budget[band] + 1e-9:
+        if self.usage(band, t) + toa > self.budget[self._k(band)] + 1e-9:
             return False
         return not self.busy_at(t, toa)
 
     def send(self, band, t, toa, tenant, attacker):
-        self.log[band].append((t, toa, tenant))
-        self.sum[band] += toa
-        self.tsum[band][tenant] += toa
+        k = self._k(band)
+        self.log[k].append((t, toa, tenant))
+        self.sum[k] += toa
+        self.tsum[k][tenant] += toa
         self.tx.append((t, t + toa))
         if t >= self.sim.cfg.t_measure_s:
             self.airtime_by[("attacker" if attacker else "honest", band)] += toa
@@ -144,6 +156,12 @@ class Simulation:
         self.cmd_generated = 0
         self.ts = defaultdict(lambda: defaultdict(float))
         self.uplink_log = [] if cfg.record_uplinks else None
+        if cfg.channel_plan not in ("3ch", "8ch"):
+            raise ValueError("channel_plan must be '3ch' or '8ch'")
+        self.plan8 = cfg.channel_plan == "8ch"
+        self.n_ch = 8 if self.plan8 else cfg.n_channels
+        self.cur_rx1_band = RX1
+        self._last_dl_ok = True
         self._place_devices()
         self.sched = make_scheduler(self)
 
@@ -244,6 +262,8 @@ class Simulation:
                 d.rng_backoff = self.stream("backoff", idx)
                 d.rng_cmd = self.stream("cmd", idx)
                 d.rng_atk = self.stream("atk", idx)
+                if self.plan8:
+                    d.dc_ready_b = {RX1: 0.0, RX1B: 0.0}   # per sub-band duty-cycle clocks
                 self.devices.append(d)
                 idx += 1
         a = c.attack
@@ -330,7 +350,7 @@ class Simulation:
         self.request_tx(d, self.now)
 
     def request_tx(self, d, earliest):
-        t = max(earliest, d.dc_ready)
+        t = max(earliest, d.dc_ready)    # with "8ch", dc_ready is the earliest time any sub-band is free
         self.at(t, self.tx_start, d)
 
     # ------------------------------------------------------------------ attack
@@ -382,7 +402,15 @@ class Simulation:
             pl = phy.LORAWAN_OVERHEAD + payload + fopts
         toa = self.ul_toa(d.sf, pl)
         p = Packet()
-        p.dev, p.ch, p.sf, p.rssi = d, d.rng_chan.randrange(c.n_channels), d.sf, d.rssi
+        if self.plan8:
+            # pick uniformly among the channels whose sub-band is free now (channels 0-2: 868.x, 3-7: 867.x)
+            free = [ch for ch in range(8) if d.dc_ready_b[RX1 if ch < 3 else RX1B] <= self.now + 1e-9]
+            ch = free[d.rng_chan.randrange(len(free))]
+            band1 = RX1 if ch < 3 else RX1B
+        else:
+            ch, band1 = d.rng_chan.randrange(c.n_channels), RX1
+        p.dev, p.ch, p.sf, p.rssi = d, ch, d.sf, d.rssi
+        p.band1 = band1
         p.t0, p.t1, p.toa = self.now, self.now + toa, toa
         p.lost, p.locked = False, True
         p.confirmed, p.mac, p.join, p.msg, p.attack = msg.confirmed, msg.mac, msg.join, msg, attack
@@ -410,7 +438,11 @@ class Simulation:
             self._receive_multi(p, d)
         msg.tx_count += 1
         d.charge_mas += toa * c.i_tx_ma
-        d.dc_ready = p.t1 + toa * (1.0 / c.dc_device - 1.0)
+        if self.plan8:
+            d.dc_ready_b[p.band1] = p.t1 + toa * (1.0 / c.dc_device - 1.0)
+            d.dc_ready = min(d.dc_ready_b.values())
+        else:
+            d.dc_ready = p.t1 + toa * (1.0 / c.dc_device - 1.0)
         if self.in_window(self.now):
             key = "atk" if attack else "hon"
             self.m[f"ul_tx_{key}"] += 1
@@ -490,6 +522,8 @@ class Simulation:
         dl = None
         if received:
             dl = self.ns_handle(p)
+            if dl is not None and not self._last_dl_ok:
+                dl = None        # sent but too weak to decode: the device hears nothing in either window
         d1 = c.join_delay1_s if p.join else c.rx1_delay_s
         d2 = c.join_delay2_s if p.join else c.rx2_delay_s
         # Class A receive windows (energy and timing)
@@ -558,6 +592,7 @@ class Simulation:
                               toa1=self.dl_toa(p.sf, pl), toa2=self.dl_toa(c.rx2_sf, pl),
                               has_ack=has_ack, has_mac=has_mac, has_cmd=has_cmd, has_join=has_join,
                               fcnt=p.msg.fcnt, retx=p.msg.tx_count > 1, sf=p.sf)
+        self.cur_rx1_band = p.band1
         self.gw = self.gws[0] if c.n_gateways == 1 else self.pick_gateway([self.gws[i] for i in p.heard], req)
         self.sched.observe(req, self.now)
         win = self.sched.decide(req, self.now)
@@ -576,6 +611,19 @@ class Simulation:
         self._last_dl_toa = toa
         if win_flag:
             self.m["dl_sent_atk" if p.attack else "dl_sent_hon"] += 1
+        if c.dl_link_check:
+            # path loss of this device-gateway link, from the uplink RSSI (links are reciprocal; shadowing is static)
+            ul_rssi = d.rssi if c.n_gateways == 1 else d.rssi_g[self.gw.idx]
+            pl = c.tx_power_dbm - ul_rssi
+            gw_dbm = c.gw_tx_dbm_rx1 if win == RX1 else c.gw_tx_dbm_rx2
+            dl_sf = p.sf if win == RX1 else c.rx2_sf
+            self._last_dl_ok = gw_dbm - pl >= phy.SENSITIVITY_DBM[dl_sf]
+            if not self._last_dl_ok:
+                if win_flag:
+                    self.m["dl_undecodable_atk" if p.attack else "dl_undecodable_hon"] += 1
+                if has_cmd:
+                    cmdq.popleft()           # the server considers the command sent; it is lost
+                return win
         if has_cmd:
             tg = cmdq.popleft()
             if self.in_window(tg):

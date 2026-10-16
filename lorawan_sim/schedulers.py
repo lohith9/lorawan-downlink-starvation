@@ -127,7 +127,7 @@ class DLGuard:
             return False
         if not self.c.use_reserve:
             return True
-        budget = gw.budget[band]
+        budget = gw.band_budget(band)
         total = gw.usage(band, t)
         mine = gw.tenant_usage(band, req.tenant.name, t)
         share = req.tenant.share * budget
@@ -222,14 +222,16 @@ class DCCheck(FCFS):
         self.violators = {}
 
     def on_uplink(self, p):
+        # the duty cycle applies per sub-band, so gaps are checked between uplinks in the same sub-band
         d = p.dev.id
-        prev = self.last.get(d)
+        key = (d, getattr(p, "band1", "rx1"))
+        prev = self.last.get(key)
         if prev is not None:
             end, toa = prev
             need = toa * (1.0 / self.dc - 1.0)
             if p.t0 - end < (1.0 - self.tol) * need and d not in self.violators:
                 self.violators[d] = p.t0
-        self.last[d] = (p.t1, p.toa)
+        self.last[key] = (p.t1, p.toa)
 
     def decide(self, req, now):
         if req.dev.id in self.violators:
@@ -328,24 +330,63 @@ class Rx1Only(FCFS):
         return None
 
 
+class BudgetScheduler(FCFS):
+    """The tenant cap built on the standalone reference implementation in ``budget.py``.
+
+    It makes the same decisions as ``TenantCap`` (tests/test_framework.py checks this run for run), and it is the
+    shortest example of how a server policy plugs into the simulator: subclass FCFS, override ``decide``."""
+    name = "Tenant cap (reference)"
+
+    def __init__(self, sim):
+        super().__init__(sim)
+        from .budget import DownlinkBudget, TenantProfile
+        c = sim.cfg.scheduler
+        self.budget = DownlinkBudget([TenantProfile.from_tenant(t) for t in sim.cfg.tenants],
+                                     headroom=c.headroom, burst=c.burst_frames)
+
+    def decide(self, req, now):
+        if not self.budget.has_token(req.dev.id, req.tenant.name, now):
+            return None
+        w = super().decide(req, now)
+        if w is not None:
+            self.budget.consume(req.dev.id)
+        return w
+
+
+# ---------------------------------------------------------------------- registry
+# A scheduler is any class built from the simulation object that implements
+#   observe(req, now), on_uplink(packet), decide(req, now) -> "rx1" | "rx2" | None, on_window(now).
+# Subclass FCFS to inherit no-op hooks and the regulatory check. Register new policies with
+#   @register_scheduler("mypolicy")
+# and select them with SchedulerConfig(kind="mypolicy") or the command line (--schedulers mypolicy).
+SCHEDULERS = {
+    "fcfs": FCFS,
+    "ratelimit": RateLimit,
+    "dlguard": DLGuard,
+    "tenantcap": TenantCap,
+    "budget": BudgetScheduler,
+    "dccheck": DCCheck,
+    "uplinkrate": UplinkRate,
+    "rx2prefer": Rx2Prefer,
+    "norx2spill": NoRx2Spill,
+    "rx1only": Rx1Only,
+}
+
+
+def register_scheduler(kind):
+    """Class decorator that makes a scheduler available as SchedulerConfig(kind=kind)."""
+    def deco(cls):
+        if kind in SCHEDULERS and SCHEDULERS[kind] is not cls:
+            raise ValueError(f"scheduler {kind!r} is already registered")
+        SCHEDULERS[kind] = cls
+        return cls
+    return deco
+
+
 def make_scheduler(sim):
     k = sim.cfg.scheduler.kind
-    if k == "fcfs":
-        return Recorder(sim) if sim.cfg.record_detector_trace else FCFS(sim)
-    if k == "ratelimit":
-        return RateLimit(sim)
-    if k == "dlguard":
-        return DLGuard(sim)
-    if k == "tenantcap":
-        return TenantCap(sim)
-    if k == "dccheck":
-        return DCCheck(sim)
-    if k == "uplinkrate":
-        return UplinkRate(sim)
-    if k == "rx2prefer":
-        return Rx2Prefer(sim)
-    if k == "norx2spill":
-        return NoRx2Spill(sim)
-    if k == "rx1only":
-        return Rx1Only(sim)
-    raise ValueError(k)
+    if k == "fcfs" and sim.cfg.record_detector_trace:
+        return Recorder(sim)
+    if k not in SCHEDULERS:
+        raise ValueError(f"unknown scheduler {k!r}; known: {', '.join(sorted(SCHEDULERS))}")
+    return SCHEDULERS[k](sim)

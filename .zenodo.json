@@ -1,14 +1,17 @@
 {
   "title": "Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments",
   "upload_type": "software",
-  "description": "Discrete-event simulator of a shared EU868 LoRaWAN cell, experiment scripts and raw results for the paper 'Downlink Starvation in Shared LoRaWAN Cells: Attacks by Authenticated Devices and Per-Tenant Downlink Budgets' (SysCom 2026).",
-  "license": "MIT",
-  "keywords": ["LoRaWAN", "denial of service", "duty cycle", "downlink scheduling", "simulation"],
+  "description": "<p>Discrete-event simulator of shared EU868 LoRaWAN cells, experiment scripts and raw results for the paper \"Downlink Starvation in Shared LoRaWAN Cells: Attacks by Authenticated Devices and Per-Tenant Downlink Budgets\". It shows how one device with valid keys that obeys the duty cycle can use up a shared gateway's downlink budget, and compares network-server policies against it, including a per-tenant downlink budget with a standalone reference implementation. All results come from simulation.</p>",
   "creators": [
-    {"name": "Andra, Lohith Sai", "orcid": "0009-0007-6826-604X"},
-    {"name": "Ryan, Banze", "orcid": "0009-0000-4629-7901"},
-    {"name": "Bondada, Sivakumar", "orcid": "0009-0001-5201-459X"},
-    {"name": "Goluguri, Vasavi Sunitha", "orcid": "0009-0004-8136-8591"},
-    {"name": "Andra, Likhith Sai"}
+    {"name": "Andra, Lohith Sai", "affiliation": "Independent Researcher, Henrico, VA, USA", "orcid": "0009-0007-6826-604X"},
+    {"name": "Ryan, Banze", "affiliation": "Liberty Systems and Analytics, MD, USA", "orcid": "0009-0000-4629-7901"},
+    {"name": "Bondada, Sivakumar", "affiliation": "Tata Consultancy Services, Pune, India", "orcid": "0009-0001-5201-459X"},
+    {"name": "Goluguri, Vasavi Sunitha", "affiliation": "SS Software Solutions LLC, USA", "orcid": "0009-0004-8136-8591"},
+    {"name": "Andra, Likhith Sai", "affiliation": "Independent Researcher, India"}
+  ],
+  "license": "MIT",
+  "keywords": ["LoRaWAN", "denial of service", "duty cycle", "downlink scheduling", "smart city", "simulation", "insider threat"],
+  "related_identifiers": [
+    {"identifier": "https://github.com/lohith9/lorawan-downlink-starvation", "relation": "isSupplementTo", "scheme": "url"}
   ]
 }

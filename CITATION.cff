@@ -1,21 +1,30 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments"
-version: 1.0.0
+type: software
+version: 1.1.0
+date-released: 2026-10-16
 license: MIT
 repository-code: "https://github.com/lohith9/lorawan-downlink-starvation"
+doi: 10.5281/zenodo.23424370
+keywords: [LoRaWAN, denial of service, duty cycle, downlink scheduling, smart city, simulation]
 authors:
   - family-names: Andra
     given-names: Lohith Sai
+    affiliation: Independent Researcher, Henrico, VA, USA
     orcid: "https://orcid.org/0009-0007-6826-604X"
   - family-names: Ryan
     given-names: Banze
+    affiliation: Liberty Systems and Analytics, MD, USA
     orcid: "https://orcid.org/0009-0000-4629-7901"
   - family-names: Bondada
     given-names: Sivakumar
+    affiliation: Tata Consultancy Services, Pune, India
     orcid: "https://orcid.org/0009-0001-5201-459X"
   - family-names: Goluguri
     given-names: Vasavi Sunitha
+    affiliation: SS Software Solutions LLC, USA
     orcid: "https://orcid.org/0009-0004-8136-8591"
   - family-names: Andra
     given-names: Likhith Sai
+    affiliation: Independent Researcher, India

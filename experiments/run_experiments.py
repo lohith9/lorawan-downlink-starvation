@@ -136,6 +136,29 @@ def experiments():
                         for s in S for g, gw in GW.items()
                         for sc, kw in [("fcfs", {}), ("uplinkrate", dict(uplink_k=3.0)), ("ratelimit", {}), ("tenantcap", {})]
                         for name in SC17]
+    # E18: whose credentials? The headline attacks (1 compliant SF7 device, 32 compliant SF12 devices) with the keys
+    # of each tenant, including the two critical ones, which the per-tenant budget sizes more generously.
+    E18_SC = [("fcfs", {}), ("uplinkrate", dict(uplink_k=3.0)), ("ratelimit", {}), ("tenantcap", {}), ("dlguard", {})]
+    SC18 = {"none": dict(n_attackers=0)}
+    for tn in ["parking", "waste", "water", "streetlight"]:
+        SC18[f"sf7|{tn}"] = dict(n_attackers=1, compliant=True, sf=7, reachable_sf_only=True, tenant=tn)
+        SC18[f"k32|{tn}"] = dict(n_attackers=32, compliant=True, tenant=tn)
+    E["E18_credentials"] = [((s, sc, name), cfg(s, sc, sched=kw, **SC18[name]))
+                            for s in S for sc, kw in E18_SC for name in SC18]
+    # E19: the common 8-channel EU868 plan (868.1-868.5 MHz and 867.1-867.9 MHz, two 1% sub-bands for devices and for
+    # the gateway's RX1 replies) instead of the three default channels. Same schedulers and attacks as Figure 1.
+    SC19 = {"none": dict(n_attackers=0), "sf7": dict(n_attackers=1, compliant=True, sf=7, reachable_sf_only=True),
+            "sf7x2": dict(n_attackers=2, compliant=True, sf=7, reachable_sf_only=True),
+            "k32": dict(n_attackers=32, compliant=True)}
+    E["E19_8ch"] = [((s, sc, name), cfg(s, sc, sched=kw, sim=dict(channel_plan="8ch"), **SC19[name]))
+                    for s in S for sc, kw in E16_SC for name in SC19]
+    # X6: downlink link budget. RX2 at SF9 only helps if far devices can decode it: loss-free (as in X3b), and with
+    # decodability checked for a gateway sending at 27 dBm (the RX2 sub-band limit) or 14 dBm in RX2.
+    X6V = {"sf9_lossfree": dict(rx2_sf=9), "sf9_27dBm": dict(rx2_sf=9, dl_link_check=True, gw_tx_dbm_rx2=27.0),
+           "sf9_14dBm": dict(rx2_sf=9, dl_link_check=True, gw_tx_dbm_rx2=14.0),
+           "sf12_14dBm": dict(rx2_sf=12, dl_link_check=True, gw_tx_dbm_rx2=14.0)}
+    E["X6_dl_link"] = [((s, v, sc, name), cfg(s, sc, sim=over, **SC19[name]))
+                       for s in S for v, over in X6V.items() for sc in ["fcfs", "tenantcap"] for name in ["none", "sf7"]]
     # E8: DLGuard ablation, 16 compliant attackers
     variants = {
         "FCFS": ("fcfs", {}),

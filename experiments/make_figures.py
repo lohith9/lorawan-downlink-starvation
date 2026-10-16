@@ -597,6 +597,62 @@ def e17():
                 out[gw][sc][n] = o
     NUM["E17"] = out
 
+def e18():
+    """Whose credentials (Oct. 16): the headline attacks with the keys of each tenant, five schedulers, 20 paired seeds."""
+    g = by(load("E18_credentials"), lambda k: (k[1], k[2]))
+    out = {}
+    names = sorted({k[1] for k in g})
+    for sc in ["fcfs", "uplinkrate", "ratelimit", "tenantcap", "dlguard"]:
+        out[sc] = {}
+        for n in names:
+            rs = g[(sc, n)]
+            o = {"ack_within_60s": mci([r["ack_within_60s"] for r in rs.values()]),
+                 "minus_noattack": paired(rs, g[(sc, "none")], "ack_within_60s"),
+                 "minus_tenantcap": paired(rs, g[("tenantcap", n)], "ack_within_60s"),
+                 "dl_sent_atk_per_h": mci([r.get("dl_sent_atk_per_h", float("nan")) for r in rs.values()])}
+            out[sc][n] = o
+    NUM["E18"] = out
+
+
+def e19():
+    """8-channel EU868 plan (Oct. 16): two 1% sub-bands for devices and for RX1 replies; Figure 1 schedulers and attacks."""
+    g = by(load("E19_8ch"), lambda k: (k[1], k[2]))
+    out = {}
+    for sc in E16_SC:
+        out[sc] = {}
+        for n in ["none", "sf7", "sf7x2", "k32"]:
+            rs = g[(sc, n)]
+            o = {"ack_within_60s": mci([r["ack_within_60s"] for r in rs.values()]),
+                 "minus_noattack": paired(rs, g[(sc, "none")], "ack_within_60s"),
+                 "minus_tenantcap": paired(rs, g[("tenantcap", n)], "ack_within_60s"),
+                 "ul_tx_atk_per_h": mci([r.get("ul_tx_atk_per_h", float("nan")) for r in rs.values()]),
+                 "hon_rx1_util": mci([metric(r, "hon_rx1") / 72.0 for r in rs.values()]),
+                 "ul_pdr_honest": mci([r["ul_pdr_honest"] for r in rs.values()])}
+            if sc in ("uplinkrate", "dccheck"):
+                o["attackers_flagged"] = mci([r.get("dc_flagged_attackers", float("nan")) for r in rs.values()]) if n != "none" else None
+                o["honest_flagged"] = mci([r.get("dc_flagged_honest", float("nan")) for r in rs.values()])
+            out[sc][n] = o
+    NUM["E19"] = out
+
+
+def x6():
+    """Downlink link budget (Oct. 16): RX2 at SF9 loss-free and with decodability checked at 27 dBm and 14 dBm."""
+    g = by(load("X6_dl_link"), lambda k: (k[1], k[2], k[3]))
+    out = {}
+    for v in ["sf9_lossfree", "sf9_27dBm", "sf9_14dBm", "sf12_14dBm"]:
+        out[v] = {}
+        for sc in ["fcfs", "tenantcap"]:
+            out[v][sc] = {}
+            for n in ["none", "sf7"]:
+                rs = g[(v, sc, n)]
+                out[v][sc][n] = {
+                    "ack_within_60s": mci([r["ack_within_60s"] for r in rs.values()]),
+                    "minus_noattack": paired(rs, g[(v, sc, "none")], "ack_within_60s"),
+                    "undecodable_frac_honest": mci([r["raw"].get("dl_undecodable_hon", 0) / max(1, r["raw"].get("dl_sent_hon", 0))
+                                                    for r in rs.values()])}
+    NUM["X6"] = out
+
+
 # ------------------------------------------------------------------ conference figures (printed at 100%, 8 pt text)
 CONF_RC = {"font.size": 8, "axes.labelsize": 8, "legend.fontsize": 8, "xtick.labelsize": 8, "ytick.labelsize": 8,
            "savefig.bbox": None}
@@ -795,7 +851,7 @@ def runtime():
 
 
 if __name__ == "__main__":
-    for fn in [e1, e2, e3, e5, e6, e7, e10, e8, e9, x1, x2, x3, x3b, e11, e12, e13, e14, e16, e17, conf_figs, x5, constants, worst, runtime]:
+    for fn in [e1, e2, e3, e5, e6, e7, e10, e8, e9, x1, x2, x3, x3b, e11, e12, e13, e14, e16, e17, e18, e19, x6, conf_figs, x5, constants, worst, runtime]:
         fn()
     with open(os.path.join(RES, "numbers.json"), "w") as f:
         json.dump(clean(NUM), f, indent=1, sort_keys=True)

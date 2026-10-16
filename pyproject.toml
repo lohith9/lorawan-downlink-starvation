@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lorawan-downlink-sim"
+version = "1.1.0"
+description = "Simulator and reference policy for downlink-starvation attacks in shared EU868 LoRaWAN cells"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+  {name = "Lohith Sai Andra"}, {name = "Banze Ryan"}, {name = "Sivakumar Bondada"},
+  {name = "Vasavi Sunitha Goluguri"}, {name = "Likhith Sai Andra"},
+]
+keywords = ["LoRaWAN", "denial of service", "duty cycle", "downlink scheduling", "smart city", "simulation"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: System :: Networking",
+  "Topic :: Security",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Telecommunications Industry",
+]
+dependencies = []                      # the simulator uses only the standard library
+
+[project.optional-dependencies]
+experiments = ["scipy==1.15.3", "matplotlib==3.10.9"]   # to rebuild the paper's figures and numbers.json
+
+[project.scripts]
+lorawan-dlsim = "lorawan_sim.cli:main"
+
+[project.urls]
+Repository = "https://github.com/lohith9/lorawan-downlink-starvation"
+Archive = "https://doi.org/10.5281/zenodo.23424370"
+
+[tool.setuptools]
+packages = ["lorawan_sim"]

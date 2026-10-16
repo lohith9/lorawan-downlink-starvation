@@ -1,0 +1,69 @@
+{
+ "description": "The default cell of the paper: one gateway, 1000 devices in a 360 m disc, the three default EU868 channels, RX2 at SF12.",
+ "n_devices": 1000,
+ "radius_m": 360.0,
+ "n_gateways": 1,
+ "channel_plan": "3ch",
+ "rx2_sf": 12,
+ "tenants": [
+  {
+   "name": "streetlight",
+   "critical": true,
+   "battery": false,
+   "share": 0.35,
+   "fraction": 0.25,
+   "period_s": 900,
+   "poisson": false,
+   "conf_frac": 0.1,
+   "mac_prob": 0.0,
+   "payload": 12,
+   "cmd_rate_per_h": 0.16666666666666666,
+   "cmd_payload": 6
+  },
+  {
+   "name": "water",
+   "critical": true,
+   "battery": true,
+   "share": 0.35,
+   "fraction": 0.25,
+   "period_s": 1800,
+   "poisson": false,
+   "conf_frac": 0.1,
+   "mac_prob": 0.0,
+   "payload": 10,
+   "cmd_rate_per_h": 0.0,
+   "cmd_payload": 0
+  },
+  {
+   "name": "parking",
+   "critical": false,
+   "battery": true,
+   "share": 0.15,
+   "fraction": 0.3,
+   "period_s": 600,
+   "poisson": true,
+   "conf_frac": 0.0,
+   "mac_prob": 0.005,
+   "payload": 6,
+   "cmd_rate_per_h": 0.0,
+   "cmd_payload": 0
+  },
+  {
+   "name": "waste",
+   "critical": false,
+   "battery": true,
+   "share": 0.15,
+   "fraction": 0.2,
+   "period_s": 3600,
+   "poisson": false,
+   "conf_frac": 0.05,
+   "mac_prob": 0.0,
+   "payload": 8,
+   "cmd_rate_per_h": 0.0,
+   "cmd_payload": 0
+  }
+ ],
+ "scheduler": {
+  "kind": "fcfs"
+ }
+}

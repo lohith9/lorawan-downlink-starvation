@@ -1,0 +1,62 @@
+{
+ "description": "A template to edit for your own city: the 8-channel EU868 plan, two gateways, 2000 devices. Change the tenants to match the services that share your network; fractions must sum to 1. period_s is the mean reporting period, conf_frac the share of confirmed uplinks, mac_prob the share of uplinks with a MAC request, cmd_rate_per_h the application downlinks per device per hour.",
+ "n_devices": 2000,
+ "radius_m": 360.0,
+ "n_gateways": 2,
+ "channel_plan": "8ch",
+ "rx2_sf": 12,
+ "tenants": [
+  {
+   "name": "streetlight",
+   "critical": true,
+   "fraction": 0.2,
+   "period_s": 900,
+   "conf_frac": 0.1,
+   "payload": 12,
+   "cmd_rate_per_h": 0.1667,
+   "cmd_payload": 6,
+   "battery": false,
+   "share": 0.3
+  },
+  {
+   "name": "water",
+   "critical": true,
+   "fraction": 0.2,
+   "period_s": 1800,
+   "conf_frac": 0.1,
+   "payload": 10,
+   "share": 0.3
+  },
+  {
+   "name": "air_quality",
+   "critical": false,
+   "fraction": 0.1,
+   "period_s": 600,
+   "conf_frac": 0.0,
+   "payload": 16,
+   "share": 0.1
+  },
+  {
+   "name": "parking",
+   "critical": false,
+   "fraction": 0.3,
+   "period_s": 600,
+   "poisson": true,
+   "mac_prob": 0.005,
+   "payload": 6,
+   "share": 0.15
+  },
+  {
+   "name": "waste",
+   "critical": false,
+   "fraction": 0.2,
+   "period_s": 3600,
+   "conf_frac": 0.05,
+   "payload": 8,
+   "share": 0.15
+  }
+ ],
+ "scheduler": {
+  "kind": "fcfs"
+ }
+}

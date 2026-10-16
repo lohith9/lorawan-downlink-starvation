@@ -82,6 +82,12 @@ class SimConfig:
     attack: AttackConfig = field(default_factory=AttackConfig)
     scheduler: SchedulerConfig = field(default_factory=SchedulerConfig)
     n_channels: int = 3
+    # Channel plan. "3ch": the three default EU868 channels (868.1/868.3/868.5 MHz), all in the 868.0-868.6 MHz
+    # sub-band, so devices and the gateway's RX1 replies share one 1% budget (the setting of the paper).
+    # "8ch": the common 8-channel EU868 plan; channels 0-2 are the default ones and channels 3-7 are
+    # 867.1-867.9 MHz in the 865-868 MHz sub-band, which has its own 1% budget for the device and for the gateway's
+    # RX1 replies (RX1 uses the uplink frequency). n_channels is ignored with "8ch".
+    channel_plan: str = "3ch"
     # Multi-gateway cells (Oct. 16). With n_gateways = 1 the simulator is unchanged, bit for bit.
     # With G > 1 devices are placed in a disc of radius radius_m * sqrt(G) (so device density per gateway
     # stays the same when n_devices is scaled by G), gateways sit at gw_ring_frac of that radius at equal
@@ -95,6 +101,13 @@ class SimConfig:
     dc_rx1_band: float = 0.01     # 868.0-868.6 MHz sub-band
     dc_rx2_band: float = 0.10     # 869.4-869.65 MHz sub-band
     rx2_sf: int = 12              # EU868 default RX2 data rate (DR0)
+    # Downlink link budget. Off by default (every downlink that is sent is received, as in the paper's main runs).
+    # When on, a downlink is decoded only if gateway power minus the device's path loss reaches the receiver
+    # sensitivity of the downlink's SF; airtime is spent either way. RX1 (868.0-868.6 MHz) allows 25 mW e.r.p.
+    # (14 dBm) and the RX2 sub-band (869.4-869.65 MHz) 500 mW (27 dBm).
+    dl_link_check: bool = False
+    gw_tx_dbm_rx1: float = 14.0
+    gw_tx_dbm_rx2: float = 27.0
     rx1_delay_s: float = 1.0
     rx2_delay_s: float = 2.0
     rx_timeout_symbols: int = 8
