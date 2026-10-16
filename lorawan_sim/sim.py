@@ -271,6 +271,9 @@ class Simulation:
             pool = [d for d in self.devices if d.tenant.name == a.tenant]
             if a.reachable_sf_only and a.sf is not None:
                 pool = [d for d in pool if d.own_sf <= a.sf]
+            if len(pool) < a.n_attackers:
+                raise ValueError(f"only {len(pool)} devices of tenant {a.tenant!r} can be attackers"
+                                 + (f" at SF{a.sf}" if a.reachable_sf_only else "") + f", but n_attackers={a.n_attackers}")
             for d in self.stream("attackers").sample(pool, a.n_attackers):
                 d.attacker = True
 

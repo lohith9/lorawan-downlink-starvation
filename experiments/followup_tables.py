@@ -1,4 +1,4 @@
-"""Prints the markdown tables for follow-up steps 2-5 from results/numbers.json (used in CHANGELOG.md)."""
+"""Prints the markdown tables for follow-up steps 2-5 from results/numbers.json (used in the revision record)."""
 import json
 import os
 

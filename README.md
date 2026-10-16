@@ -24,9 +24,10 @@ that budget**, and it gives operators a way to measure the risk in their own dep
 - A duty-cycle check never flags the attacker: the rule limits a device's airtime, not its number of frames.
 - Each single-knob server setting (duty-cycle check, ChirpStack-style RX2 preference, uplink-rate check, uniform
   rate limit) stops one form of the attack, and the attacker can switch to another.
-- A **per-tenant downlink budget** sized from each tenant's declared traffic profile did best overall: closest to
-  the no-attack level, or within 0.5 points of the best setting, in every case the paper reports, including
-  attackers holding a critical tenant's keys and cells with two or three gateways.
+- A **per-tenant downlink budget** sized from each tenant's declared traffic profile, alone or with DLGuard's
+  detector, did best overall: closest to the no-attack level, or within 0.5 points of the best other setting, in
+  every case the paper reports, including attackers holding a critical tenant's keys and cells with two or three
+  gateways.
 
 ## Who this is for
 
