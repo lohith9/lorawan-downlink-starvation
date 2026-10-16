@@ -32,7 +32,7 @@ lorawan-dlsim = "lorawan_sim.cli:main"
 
 [project.urls]
 Repository = "https://github.com/lohith9/lorawan-downlink-starvation"
-Archive = "https://doi.org/10.5281/zenodo.23424370"
+Archive = "https://doi.org/10.5281/zenodo.23424369"
 
 [tool.setuptools]
 packages = ["lorawan_sim"]

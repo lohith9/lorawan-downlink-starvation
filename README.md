@@ -1,6 +1,6 @@
 # Downlink starvation in shared LoRaWAN cells
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23424370.svg)](https://doi.org/10.5281/zenodo.23424370)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23424369.svg)](https://doi.org/10.5281/zenodo.23424369)
 ![tests](https://github.com/lohith9/lorawan-downlink-starvation/actions/workflows/tests.yml/badge.svg)
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
@@ -121,7 +121,8 @@ sub-band allows. The paper's limitations section discusses each assumption.
 ## Cite
 
 See `CITATION.cff`, or cite the archive: Andra, L. S., Ryan, B., Bondada, S., Goluguri, V. S., Andra, L. S. (2026).
-*Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments.* Zenodo. doi:10.5281/zenodo.23424370.
+*Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments.* Zenodo. doi:10.5281/zenodo.23424369 (all versions).
+The paper's results come from v1.1.0, doi:10.5281/zenodo.23425661.
 
 ## Responsible use
 
