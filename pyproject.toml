@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lorawan-downlink-sim"
-version = "1.1.0"
+version = "1.1.1"
 description = "Simulator and reference policy for downlink-starvation attacks in shared EU868 LoRaWAN cells"
 readme = "README.md"
 license = {text = "MIT"}

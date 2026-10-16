@@ -126,6 +126,45 @@ class LinkBudgetTest(unittest.TestCase):
         self.assertEqual(strong["raw"].get("dl_undecodable_hon", 0), 0)
 
 
+class GatewayInvariantTest(unittest.TestCase):
+    """The gateway never sends two downlinks at once and never exceeds a band's budget in any rolling hour, including
+    JoinAccepts, which are decided earlier but start later than ordinary replies."""
+
+    def _check(self, cfg):
+        import bisect
+        from lorawan_sim.sim import Simulation
+        sim = Simulation(cfg)
+        sends = []
+        for g in sim.gws:
+            orig = g.send
+            def rec(band, t, toa, tenant, attacker, g=g, orig=orig):
+                sends.append((g.idx, g._k(band), t, toa))
+                return orig(band, t, toa, tenant, attacker)
+            g.send = rec
+        sim.run()
+        self.assertGreater(len(sends), 100)
+        for gi in {s[0] for s in sends}:
+            ev = sorted((s for s in sends if s[0] == gi), key=lambda s: s[2])
+            for a, b in zip(ev, ev[1:]):
+                self.assertGreaterEqual(b[2], a[2] + a[3] - 1e-9, "overlapping downlinks")
+            for band in {s[1] for s in ev}:
+                e = [(s[2], s[3]) for s in ev if s[1] == band]
+                ts = [x[0] for x in e]
+                pre = [0.0]
+                for _, toa in e:
+                    pre.append(pre[-1] + toa)
+                for i, (t, _) in enumerate(e):
+                    j = bisect.bisect_left(ts, t - 3600.0 + 1e-9)
+                    self.assertLessEqual(pre[i + 1] - pre[j], sim.gws[gi].budget[band] + 1e-6, f"{band} over budget")
+
+    def test_join_flood(self):
+        self._check(replace(small(n_attackers=1, compliant=False, interval_s=10, mode="join"),
+                            duration_s=3 * 3600, t_attack_s=1800.0, t_measure_s=1800.0, t_train_end_s=1800.0))
+
+    def test_compliant_sf7_eight_channels(self):
+        self._check(replace(small(n_attackers=2, compliant=True, sf=7, reachable_sf_only=True), channel_plan="8ch"))
+
+
 class CliTest(unittest.TestCase):
     def test_list(self):
         self.assertEqual(cli.main(["list"]), 0)

@@ -72,7 +72,12 @@ class Gateway:
         c = sim.cfg
         bands = [RX1, RX2] + ([RX1B] if c.channel_plan == "8ch" else [])
         self.budget = {b: (c.dc_rx2_band if b == RX2 else c.dc_rx1_band) * 3600.0 for b in bands}
-        self.log = {b: deque() for b in bands}
+        self.log = {b: deque() for b in bands}    # (start, airtime, tenant), kept in start-time order
+        self.recent = {b: deque() for b in bands} # entries pruned in the last few seconds (see usage)
+        # Replies are logged when they are decided, and their start times run ahead of the decision by the receive
+        # delay (1-2 s, or 5-6 s for JoinAccept). Queries can therefore step back in time by a few seconds;
+        # self.slack covers that so the rolling-hour sums stay exact.
+        self.slack = max(c.rx1_delay_s, c.rx2_delay_s, c.join_delay1_s, c.join_delay2_s) + 1.0
         self.sum = {b: 0.0 for b in bands}
         self.tsum = {b: defaultdict(float) for b in bands}
         self.tx = []                   # list of (start, end)
@@ -85,21 +90,32 @@ class Gateway:
         return self.sim.cur_rx1_band if band == RX1 else band
 
     def _prune(self, band, t):
-        lg = self.log[band]
+        lg, rc = self.log[band], self.recent[band]
         while lg and lg[0][0] < t - 3600.0:
-            _, toa, tenant = lg.popleft()
-            self.sum[band] -= toa
-            self.tsum[band][tenant] -= toa
+            item = lg.popleft()
+            self.sum[band] -= item[1]
+            self.tsum[band][item[2]] -= item[1]
+            rc.append(item)
+        while rc and rc[0][0] < t - 3600.0 - self.slack:
+            rc.popleft()
 
     def usage(self, band, t):
         band = self._k(band)
         self._prune(band, t)
-        return self.sum[band]
+        s = self.sum[band]
+        for ts, toa, _ in self.recent[band]:     # pruned by a query a few seconds later, but still inside this window
+            if ts >= t - 3600.0:
+                s += toa
+        return s
 
     def tenant_usage(self, band, tenant, t):
         band = self._k(band)
         self._prune(band, t)
-        return self.tsum[band][tenant]
+        s = self.tsum[band][tenant]
+        for ts, toa, tn in self.recent[band]:
+            if tn == tenant and ts >= t - 3600.0:
+                s += toa
+        return s
 
     def busy_at(self, t, toa):
         for s, e in self.tx:
@@ -120,7 +136,14 @@ class Gateway:
 
     def send(self, band, t, toa, tenant, attacker):
         k = self._k(band)
-        self.log[k].append((t, toa, tenant))
+        lg = self.log[k]
+        if not lg or t >= lg[-1][0]:
+            lg.append((t, toa, tenant))
+        else:                                    # a JoinAccept decided earlier starts later than this reply
+            i = len(lg)
+            while i > 0 and lg[i - 1][0] > t:
+                i -= 1
+            lg.insert(i, (t, toa, tenant))
         self.sum[k] += toa
         self.tsum[k][tenant] += toa
         self.tx.append((t, t + toa))

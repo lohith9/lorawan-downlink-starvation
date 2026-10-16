@@ -14,4 +14,4 @@ from .schedulers import SCHEDULERS, register_scheduler, FCFS
 from .budget import DownlinkBudget, TenantProfile
 from . import scenario
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
