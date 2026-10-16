@@ -1,0 +1,29 @@
+
+digraph G {
+  graph [rankdir=TB, fontname="Times-Roman", fontsize=8, nodesep=0.12, ranksep=0.22, pad=0.02, dpi=300];
+  node  [fontname="Times-Roman", fontsize=8, shape=box, style="rounded,filled", fillcolor="#f4f4f2", color="#4a4a46", penwidth=0.7, margin="0.05,0.02"];
+  edge  [fontname="Times-Roman", fontsize=7, color="#4a4a46", arrowsize=0.45, penwidth=0.7];
+
+  hon [label="Honest Class A devices\ncritical: streetlights, water sensors\nother: parking, waste bins"];
+  atk [label="Compromised device\n(valid keys of a tenant)", fillcolor="#fbe1d6", color="#b3471d", penwidth=1.2];
+  gw  [label="Shared gateway (half-duplex)\nRX1 band 1% = 36 s/h\nRX2 band 10% = 360 s/h", fillcolor="#e6eef9"];
+  subgraph cluster_ns {
+    label="Network server"; fontsize=8; color="#9a9a94"; style="rounded,dashed"; margin=6;
+    mac [label="MAC layer:\nACKs, MAC answers"];
+    dlg [label="DLGuard\nbucket | share | detector", fillcolor="#dff3ea", color="#14805a", penwidth=1.1];
+  }
+  js  [label="Join\nserver"];
+  as  [label="Tenant app\nservers"];
+  soc [label="City SOC"];
+
+  hon -> gw [label=" uplinks"];
+  atk -> gw [color="#b3471d", penwidth=1.1, fontcolor="#b3471d", label=" downlink-\n forcing frames"];
+  gw -> mac [dir=both, label=" backhaul"];
+  mac -> dlg [label=" request"];
+  dlg -> gw [label="grant RX1/RX2\nor deny", style=dashed, constraint=false];
+  mac -> js [dir=both];
+  mac -> as [dir=both];
+  dlg -> soc [label=" alert", style=dashed];
+  {rank=same; hon; atk;}
+  {rank=same; js; as; soc;}
+}

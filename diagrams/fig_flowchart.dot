@@ -1,0 +1,28 @@
+
+digraph F {
+  graph [rankdir=TB, fontname="Times-Roman", fontsize=8, nodesep=0.15, ranksep=0.13, pad=0.02, dpi=300];
+  node  [fontname="Times-Roman", fontsize=8, shape=box, style="rounded,filled", fillcolor="#f4f4f2", color="#4a4a46", penwidth=0.7, margin="0.05,0.02"];
+  edge  [fontname="Times-Roman", fontsize=7, color="#4a4a46", arrowsize=0.45, penwidth=0.7];
+
+  s   [label="Uplink needs a downlink\n(ACK, MAC answer, command)", fillcolor="#e6eef9"];
+  obs [label="Count request for device d"];
+  q   [label="d quarantined and request\nis MAC-only or a join?", style="filled,bold", fillcolor="#ffffff"];
+  b   [label="Bucket of d has a token?", style="filled,bold", fillcolor="#ffffff"];
+  r   [label="Window W = RX1, then RX2:\nregulatory budget left\nand gateway idle?", style="filled,bold", fillcolor="#ffffff"];
+  sh  [label="Tenant under its share, or\nborrowing allowed for its class?", style="filled,bold", fillcolor="#ffffff"];
+  g   [label="Grant in W\nspend 1 token", fillcolor="#dff3ea", color="#14805a"];
+  n   [label="Deny", fillcolor="#fbe1d6", color="#b3471d"];
+  win [label="Every 10 min: count > max(mu_k + theta sigma_k, 1)\nin 2 windows in a row -> quarantine, alert SOC", fillcolor="#fff4d6", color="#a07000"];
+
+  s -> obs -> q;
+  q -> b [label=" no"];
+  b -> r [label=" yes"];
+  r -> sh [label=" yes"];
+  sh -> g [label=" yes"];
+  q -> n [label="yes"];
+  b -> n [label="no"];
+  r -> n [label="no, for both\nwindows"];
+  sh -> r [label="no: try RX2", style=dashed, constraint=false];
+  g -> win [style=invis];
+  {rank=same; sh; n;}
+}

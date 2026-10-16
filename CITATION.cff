@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments"
+version: 1.0.0
+license: MIT
+repository-code: "https://github.com/lohith9/lorawan-downlink-starvation"
+authors:
+  - family-names: Andra
+    given-names: Lohith Sai
+    orcid: "https://orcid.org/0009-0007-6826-604X"
+  - family-names: Ryan
+    given-names: Banze
+    orcid: "https://orcid.org/0009-0000-4629-7901"
+  - family-names: Bondada
+    given-names: Sivakumar
+    orcid: "https://orcid.org/0009-0001-5201-459X"
+  - family-names: Goluguri
+    given-names: Vasavi Sunitha
+    orcid: "https://orcid.org/0009-0004-8136-8591"
+  - family-names: Andra
+    given-names: Likhith Sai

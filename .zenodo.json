@@ -1,0 +1,14 @@
+{
+  "title": "Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments",
+  "upload_type": "software",
+  "description": "Discrete-event simulator of a shared EU868 LoRaWAN cell, experiment scripts and raw results for the paper 'Downlink Starvation in Shared LoRaWAN Cells: Attacks by Authenticated Devices and Per-Tenant Downlink Budgets' (SysCom 2026).",
+  "license": "MIT",
+  "keywords": ["LoRaWAN", "denial of service", "duty cycle", "downlink scheduling", "simulation"],
+  "creators": [
+    {"name": "Andra, Lohith Sai", "orcid": "0009-0007-6826-604X"},
+    {"name": "Ryan, Banze", "orcid": "0009-0000-4629-7901"},
+    {"name": "Bondada, Sivakumar", "orcid": "0009-0001-5201-459X"},
+    {"name": "Goluguri, Vasavi Sunitha", "orcid": "0009-0004-8136-8591"},
+    {"name": "Andra, Likhith Sai"}
+  ]
+}
