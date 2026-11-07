@@ -1,0 +1,4 @@
+.chirpstack-docker/
+devices.json
+results.json
+__pycache__/

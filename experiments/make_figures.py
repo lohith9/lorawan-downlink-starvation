@@ -459,6 +459,50 @@ def x3b():
     NUM["X3b"] = out
 
 
+def conf_mechanism():
+    """Schematic of the attack mechanism. Short box labels; detail is in the caption. 7.37 cm wide, 8 pt."""
+    import matplotlib.patches as mp
+    B1 = NUM["const"]["budget_rx1_s_per_h"]
+    B2 = NUM["const"]["budget_rx2_s_per_h"]
+    with plt.rc_context({"font.size": 8}):
+        fig = plt.figure(figsize=(2.9, 1.85))
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.axis("off")
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 6)
+
+        def box(x, y, w, h, text, fc="#eef2f8", ec="#2a3340"):
+            ax.add_patch(mp.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.03,rounding_size=0.1",
+                                           fc=fc, ec=ec, lw=0.8))
+            ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=8, color="#1b2129")
+
+        def arrow(x0, y0, x1, y1, ls="-", color="#2a3340"):
+            ax.annotate("", xy=(x1, y1), xytext=(x0, y0),
+                        arrowprops=dict(arrowstyle="-|>", lw=0.9, color=color, ls=ls))
+
+        box(0.1, 3.5, 2.3, 1.2, "Compromised\nSF7 device", fc="#fdecea", ec="#b23b2e")
+        arrow(2.5, 4.1, 3.45, 4.1)
+        ax.text(2.68, 4.62, "≈{:.0f}/h".format(NUM["E10"]["measured_ul_per_h"][7]["mean"]),
+                ha="center", va="bottom", fontsize=8, color="#3a424d")
+        box(3.5, 3.45, 2.1, 1.3, "Network\nserver", fc="#eef2f8")
+        arrow(5.7, 4.1, 6.75, 4.7)
+        ax.add_patch(mp.Rectangle((6.85, 4.25), 3.0, 0.62, fc="#eda100", ec="#2a3340", lw=0.8, hatch="////"))
+        ax.text(8.35, 5.15, "RX1  1%  {:.0f} s/h".format(B1), ha="center", va="center", fontsize=8)
+        arrow(8.35, 4.2, 8.35, 3.55)
+        ax.text(8.15, 3.88, "overflow", ha="right", va="center", fontsize=8, color="#3a424d")
+        ax.add_patch(mp.Rectangle((6.85, 2.55), 3.0, 0.78, fc="#8f6bbf", ec="#2a3340", lw=0.8))
+        ax.text(8.35, 2.94, "RX2  10%  SF12", ha="center", va="center", fontsize=8, color="white")
+        box(0.1, 0.85, 2.5, 1.05, "Honest device", fc="#eafaf1", ec="#1baf7a")
+        arrow(2.7, 1.4, 4.55, 3.4, ls=(0, (3, 2)), color="#b23b2e")
+        ax.text(2.75, 0.45, "uplink lost (gateway half-duplex)", ha="left", va="center",
+                fontsize=8, color="#b23b2e")
+        fig.savefig(os.path.join(FIG, "conf_mechanism.pdf"))
+        fig.savefig(os.path.join(FIG, "conf_mechanism.png"), dpi=600)
+        plt.close(fig)
+
+
+# ------------------------------------------------------------------ E11 RX2 policy and uplink-rate baselines
+
 # ------------------------------------------------------------------ E11 RX2 policy and uplink-rate baselines
 E11_SC = ["fcfs", "ratelimit", "dccheck", "norx2spill", "rx1only", "uplinkrate", "tenantcap", "dlguard"]
 SCN = ["none", "sf7", "k16", "k32"]
@@ -651,6 +695,30 @@ def x6():
                     "undecodable_frac_honest": mci([r["raw"].get("dl_undecodable_hon", 0) / max(1, r["raw"].get("dl_sent_hon", 0))
                                                     for r in rs.values()])}
     NUM["X6"] = out
+
+
+def live_server():
+    """Fold the measured ChirpStack integration result (integration/results_measured.json) into numbers.json so
+    the paper's live-server numbers come from the same single source. Skips quietly if the file is absent."""
+    path = os.path.join(ROOT, "integration", "results_measured.json")
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        r = json.load(f)
+    rows = r["rows"]
+    atk = next(x for x in rows if x["attacker"])
+    hon = [x for x in rows if not x["attacker"]]
+    NUM["live_server"] = {
+        "server": r["server"],
+        "attacker_uplinks": atk["uplinks"],
+        "attacker_native": atk["downlinks_native"],
+        "attacker_gated": atk["downlinks_gated"],
+        "honest_devices": len(hon),
+        "honest_delivered_native": sum(x["downlinks_native"] for x in hon),
+        "honest_delivered_gated": sum(x["downlinks_gated"] for x in hon),
+        "downlinks_total": r["native_summary"]["downlinks_total"],
+        "rx1": r["native_summary"]["rx1"], "rx2": r["native_summary"]["rx2"],
+    }
 
 
 # ------------------------------------------------------------------ conference figures (printed at 100%, 8 pt text)
@@ -850,8 +918,147 @@ def runtime():
     NUM["runtime"] = out
 
 
+
+# ------------------------------------------------------------------ reviewer camera-ready tables (no new simulation)
+def _detector_counts(r, theta=4.0, consecutive=2, min_count=1.0, sigma_floor=0.25, t_attack=5400.0,
+                     t_train=(900.0, 5400.0)):
+    """Like detector_eval but returns raw counts, so precision can be formed."""
+    tenant_of = {int(k): v for k, v in r["tenant_of"].items()}
+    atk = set(r["attackers"])
+    trace = [(t, {int(k): v for k, v in c.items()}) for t, c in r["trace"]]
+    train = defaultdict(list)
+    for t, c in trace:
+        if t_train[0] < t <= t_train[1] + 1e-6:
+            for d, tn in tenant_of.items():
+                train[tn].append(c.get(d, 0.0))
+    fit = {}
+    for tn, xs in train.items():
+        mu = sum(xs) / len(xs)
+        sd = math.sqrt(sum((x - mu) ** 2 for x in xs) / (len(xs) - 1))
+        fit[tn] = (mu, max(sd, sigma_floor))
+    over = defaultdict(int)
+    flagged = {}
+    for t, c in trace:
+        if t <= t_train[1]:
+            continue
+        for d, tn in tenant_of.items():
+            if d in flagged:
+                continue
+            mu, sd = fit[tn]
+            if c.get(d, 0.0) > max(mu + theta * sd, min_count):
+                over[d] += 1
+                if over[d] >= consecutive:
+                    flagged[d] = t - t_attack
+            else:
+                over[d] = 0
+    tp = sum(1 for d in flagged if d in atk)
+    fp = sum(1 for d in flagged if d not in atk)
+    neg = len(tenant_of) - len(atk)
+    delays = [flagged[d] for d in flagged if d in atk]
+    return tp, fp, len(atk), neg, delays
+
+
+def detector_quality():
+    """Precision, recall (TPR), false-positive rate and detection latency, by attacker downlink rate (E6),
+    and under detector poisoning (X1). Answers reviewer R12 comment 4 and R2 comment 11."""
+    rows = load("E6_detector")
+    by_rate = {}
+    for lab in ["compliant SF12", "1 frame / 2 min", "1 frame / 5 min", "1 frame / 10 min"]:
+        TP = FP = ATK = NEG = 0
+        delays = []
+        rate = []
+        for r in rows:
+            if r["key"][1] != lab:
+                continue
+            tp, fp, a, neg, dl = _detector_counts(r)
+            TP += tp; FP += fp; ATK += a; NEG += neg; delays += dl
+            rate.append(r["dl_req_atk_per_h"])
+        recall = TP / ATK if ATK else None
+        precision = TP / (TP + FP) if (TP + FP) else None
+        by_rate[lab] = {
+            "atk_dl_req_per_h": st.mean(rate),
+            "precision": precision, "recall": recall,
+            "fpr": FP / NEG if NEG else None,
+            "tp": TP, "fp": FP, "attackers": ATK, "honest": NEG,
+            "delay_mean_min": (st.mean(delays) / 60) if delays else None,
+            "delay_max_min": (max(delays) / 60) if delays else None,
+        }
+    # poisoning: precision/recall when attackers are present during training (X1), start=0 vs start after training
+    xrows = load("X1_poisoning")
+    pois = {}
+    for k in sorted({r["key"][1] for r in xrows}):
+        for start in sorted({r["key"][2] for r in xrows}):
+            grp = [r for r in xrows if r["key"][1] == k and r["key"][2] == start]
+            if not grp:
+                continue
+            det = [r["detected"] for r in grp]
+            fq = [r.get("false_quarantine", 0) or 0 for r in grp]
+            recall = mci([d / k for d in det])
+            prec = mci([d / (d + f) if (d + f) else 1.0 for d, f in zip(det, fq)])
+            pois[f"{k}|{int(start)}"] = {"recall": recall, "precision": prec,
+                                         "false_quarantine": mci([float(f) for f in fq])}
+    NUM["detector_quality"] = {"by_rate": by_rate, "poisoning": pois,
+                               "note": "E6: detector alone on unmitigated FCFS traces, theta=4, 2 windows. "
+                                       "X1: compliant attackers present from the given start time (s); "
+                                       "start>=5400 is after training."}
+
+
+def honest_denied():
+    """Share of honest downlink requests the policy does NOT serve, with and without attack, per scheduler.
+    Answers R2 comments 6, 8 and 11 (legitimate-traffic suppression)."""
+    def denied(sc, n):
+        if sc == "uplinkrate":
+            v = NUM["E14"][3][n]["dl_grant_honest"]
+        elif sc == "rx2prefer":
+            v = NUM["E15"][n]["dl_grant_honest"]
+        else:
+            v = NUM["E11"]["summary"][sc][n]["dl_grant_honest"]
+        return {"mean": 1 - v["mean"], "ci": v["ci"]}
+    scs = ["fcfs", "dccheck", "rx2prefer", "uplinkrate", "ratelimit", "tenantcap", "dlguard"]
+    NUM["honest_denied"] = {sc: {n: denied(sc, n) for n in ["none", "sf7", "k32"]} for sc in scs}
+    # bucket-depth effect on honest traffic with no attack (E13): b=1 starves honest retransmissions
+    NUM["honest_denied_bucket"] = {
+        f"h{h}_b{b}": NUM["E13"]["tenantcap"][f"h{h}_b{b}"]["none"]["honest_denied"]
+        for h in [2, 4, 8] for b in [1, 3, 5]}
+
+
+def fairness():
+    """Per-tenant delivery ratio with no attack vs one compliant SF7 attacker, under FCFS / tenant cap /
+    DLGuard. Shows whether protecting critical tenants penalizes non-critical ones. R2 comment 11, R4."""
+    tenants = ["streetlight", "water", "parking", "waste"]
+    base = {sc: {t: NUM["E1"]["summary"][sc][0][f"pt:{t}:pdr"] for t in tenants}
+            for sc in ["fcfs", "tenantcap", "dlguard"]}
+    atk = {sc: {t: NUM["E10"]["summary"][sc][7][f"pt:{t}:pdr"] for t in tenants}
+           for sc in ["fcfs", "tenantcap", "dlguard"]}
+    NUM["fairness"] = {"no_attack": base, "one_sf7": atk,
+                       "note": "pt:<tenant>:pdr is that tenant's uplink delivery ratio; 20 seeds."}
+
+
+def overhead():
+    """Per-downlink cost of the per-tenant budget (the admission check). O(1): one token-bucket operation.
+    Micro-benchmark of lorawan_sim.budget.DownlinkBudget.try_acquire. Answers R4 and R12 comment 5."""
+    import time as _time
+    from lorawan_sim.budget import DownlinkBudget, TenantProfile
+    profiles = [TenantProfile("streetlight", 900, 0.10, commands_per_hour=1 / 6, critical=True),
+                TenantProfile("water", 1800, 0.10, critical=True),
+                TenantProfile("parking", 600, mac_fraction=0.005),
+                TenantProfile("waste", 3600, 0.05)]
+    b = DownlinkBudget(profiles, headroom=4.0, burst=3.0)
+    N = 1_000_000
+    ids = [i % 1000 for i in range(N)]
+    t0 = _time.perf_counter()
+    for i in ids:
+        b.try_acquire(i, "parking", now=i * 1e-3)
+    dt = _time.perf_counter() - t0
+    NUM["overhead"] = {"budget_try_acquire_ns_per_call": round(dt / N * 1e9, 1),
+                       "calls": N, "complexity": "O(1) per downlink; one token-bucket refill and compare",
+                       "detector_per_window": "O(devices): one count compare per device per 10-min window",
+                       "note": "measured on the machine that ran make_figures; wall-clock, single thread"}
+
+
 if __name__ == "__main__":
-    for fn in [e1, e2, e3, e5, e6, e7, e10, e8, e9, x1, x2, x3, x3b, e11, e12, e13, e14, e16, e17, e18, e19, x6, conf_figs, x5, constants, worst, runtime]:
+    for fn in [e1, e2, e3, e5, e6, e7, e10, e8, e9, x1, x2, x3, x3b, e11, e12, e13, e14, e16, e17, e18, e19, x6, conf_figs, x5, constants, worst, runtime,
+               detector_quality, honest_denied, fairness, overhead, live_server, conf_mechanism]:
         fn()
     with open(os.path.join(RES, "numbers.json"), "w") as f:
         json.dump(clean(NUM), f, indent=1, sort_keys=True)

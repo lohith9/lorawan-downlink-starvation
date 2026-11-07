@@ -1,0 +1,19 @@
+{
+ "server": "ChirpStack 4.19.2 (live, Semtech UDP)",
+ "native_summary": {"downlinks_total": 540, "delivered": 540, "dropped_by_gate": 0,
+  "rx1": 540, "rx2": 0, "rx2_airtime_s": 0, "rx1_airtime_s": 44.418},
+ "rows": [
+  {"device": "honest-street-0", "tenant": "streetlight", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-street-1", "tenant": "streetlight", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-water-0", "tenant": "water", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-water-1", "tenant": "water", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-parking-0", "tenant": "parking", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-parking-1", "tenant": "parking", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-parking-2", "tenant": "parking", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-parking-3", "tenant": "parking", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-waste-0", "tenant": "waste", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "honest-waste-1", "tenant": "waste", "attacker": false, "uplinks": 1, "downlinks_native": 1, "downlinks_gated": 1},
+  {"device": "attacker-parking-sf7", "tenant": "parking", "attacker": true, "uplinks": 773, "downlinks_native": 530, "downlinks_gated": 3}
+ ],
+ "note": "downlinks_native = ACKs ChirpStack scheduled (no per-device limit); downlinks_gated = after the per-tenant budget at egress."
+}

@@ -1,7 +1,7 @@
 {
   "title": "Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments",
   "upload_type": "software",
-  "description": "<p>Discrete-event simulator of shared EU868 LoRaWAN cells, experiment scripts and raw results for the paper \"Downlink Starvation in Shared LoRaWAN Cells: Attacks by Authenticated Devices and Per-Tenant Downlink Budgets\". It shows how one device with valid keys that obeys the duty cycle can use up a shared gateway's downlink budget, and compares network-server policies against it, including a per-tenant downlink budget with a standalone reference implementation. All results come from simulation.</p>",
+  "description": "<p>Discrete-event simulator of shared EU868 LoRaWAN cells, experiment scripts and raw results for the paper \"Downlink Starvation in Shared LoRaWAN Cells: Attacks by Authenticated Devices and Per-Tenant Downlink Budgets\". It shows how one device with valid keys that obeys the duty cycle can use up a shared gateway's downlink budget, and compares network-server policies against it, including a per-tenant downlink budget with a standalone reference implementation. The simulation results are complemented by a live integration check against an unmodified ChirpStack server. This version (1.2.0) adds the ChirpStack integration harness and further analysis: the effect on legitimate traffic, detector precision and recall, parameter sensitivity, per-tenant fairness and runtime cost.</p>",
   "creators": [
     {"name": "Andra, Lohith Sai", "affiliation": "Independent Researcher, Henrico, VA, USA", "orcid": "0009-0007-6826-604X"},
     {"name": "Ryan, Banze", "affiliation": "Liberty Systems and Analytics, MD, USA", "orcid": "0009-0000-4629-7901"},

@@ -1,0 +1,5 @@
+# Python packages for the live ChirpStack integration test only (not needed to run the simulator).
+chirpstack-api==4.9.0   # gRPC stubs for ChirpStack v4 (tenant/app/device/gateway provisioning)
+grpcio==1.68.1
+protobuf==5.29.1
+cryptography==44.0.0    # AES-CMAC MIC and AES-CTR FRMPayload encryption for LoRaWAN 1.0.x frames

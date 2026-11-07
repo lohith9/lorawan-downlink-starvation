@@ -60201,6 +60201,404 @@
    }
   }
  },
+ "detector_quality": {
+  "by_rate": {
+   "1 frame / 10 min": {
+    "atk_dl_req_per_h": 4.542857,
+    "attackers": 40,
+    "delay_max_min": null,
+    "delay_mean_min": null,
+    "fp": 0,
+    "fpr": 0.0,
+    "honest": 9960,
+    "precision": null,
+    "recall": 0.0,
+    "tp": 0
+   },
+   "1 frame / 2 min": {
+    "atk_dl_req_per_h": 22.3,
+    "attackers": 40,
+    "delay_max_min": 40.0,
+    "delay_mean_min": 20.75,
+    "fp": 0,
+    "fpr": 0.0,
+    "honest": 9960,
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 40
+   },
+   "1 frame / 5 min": {
+    "atk_dl_req_per_h": 8.978571,
+    "attackers": 40,
+    "delay_max_min": 170.0,
+    "delay_mean_min": 50.25641,
+    "fp": 0,
+    "fpr": 0.0,
+    "honest": 9960,
+    "precision": 1.0,
+    "recall": 0.975,
+    "tp": 39
+   },
+   "compliant SF12": {
+    "atk_dl_req_per_h": 22.635714,
+    "attackers": 40,
+    "delay_max_min": 20.0,
+    "delay_mean_min": 20.0,
+    "fp": 0,
+    "fpr": 0.0,
+    "honest": 9960,
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 40
+   }
+  },
+  "note": "E6: detector alone on unmitigated FCFS traces, theta=4, 2 windows. X1: compliant attackers present from the given start time (s); start>=5400 is after training.",
+  "poisoning": {
+   "16|0": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.041665,
+     "mean": 0.884375,
+     "n": 20
+    }
+   },
+   "16|1800": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.029823,
+     "mean": 0.921875,
+     "n": 20
+    }
+   },
+   "16|5400": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    }
+   },
+   "1|0": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    }
+   },
+   "1|1800": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    }
+   },
+   "1|5400": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    }
+   },
+   "32|0": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.091631,
+     "mean": 0.409375,
+     "n": 20
+    }
+   },
+   "32|1800": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.055864,
+     "mean": 0.63125,
+     "n": 20
+    }
+   },
+   "32|5400": {
+    "false_quarantine": {
+     "ci": 0.104651,
+     "mean": 0.05,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.003171,
+     "mean": 0.998485,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.00327,
+     "mean": 0.998437,
+     "n": 20
+    }
+   },
+   "4|0": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    }
+   },
+   "4|1800": {
+    "false_quarantine": {
+     "ci": 0.104651,
+     "mean": 0.05,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.02093,
+     "mean": 0.99,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    }
+   },
+   "4|5400": {
+    "false_quarantine": {
+     "ci": 0.0,
+     "mean": 0.0,
+     "n": 20
+    },
+    "precision": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    },
+    "recall": {
+     "ci": 0.0,
+     "mean": 1.0,
+     "n": 20
+    }
+   }
+  }
+ },
+ "fairness": {
+  "no_attack": {
+   "dlguard": {
+    "parking": {
+     "ci": 0.003129,
+     "mean": 0.854411,
+     "n": 20
+    },
+    "streetlight": {
+     "ci": 0.004855,
+     "mean": 0.846621,
+     "n": 20
+    },
+    "waste": {
+     "ci": 0.007646,
+     "mean": 0.843004,
+     "n": 20
+    },
+    "water": {
+     "ci": 0.005703,
+     "mean": 0.84766,
+     "n": 20
+    }
+   },
+   "fcfs": {
+    "parking": {
+     "ci": 0.00314,
+     "mean": 0.854427,
+     "n": 20
+    },
+    "streetlight": {
+     "ci": 0.004852,
+     "mean": 0.846635,
+     "n": 20
+    },
+    "waste": {
+     "ci": 0.007646,
+     "mean": 0.843004,
+     "n": 20
+    },
+    "water": {
+     "ci": 0.005683,
+     "mean": 0.847636,
+     "n": 20
+    }
+   },
+   "tenantcap": {
+    "parking": {
+     "ci": 0.00314,
+     "mean": 0.854427,
+     "n": 20
+    },
+    "streetlight": {
+     "ci": 0.004852,
+     "mean": 0.846635,
+     "n": 20
+    },
+    "waste": {
+     "ci": 0.007646,
+     "mean": 0.843004,
+     "n": 20
+    },
+    "water": {
+     "ci": 0.005683,
+     "mean": 0.847636,
+     "n": 20
+    }
+   }
+  },
+  "note": "pt:<tenant>:pdr is that tenant's uplink delivery ratio; 20 seeds.",
+  "one_sf7": {
+   "dlguard": {
+    "parking": {
+     "ci": 0.003086,
+     "mean": 0.853398,
+     "n": 20
+    },
+    "streetlight": {
+     "ci": 0.004684,
+     "mean": 0.845716,
+     "n": 20
+    },
+    "waste": {
+     "ci": 0.007619,
+     "mean": 0.841893,
+     "n": 20
+    },
+    "water": {
+     "ci": 0.005386,
+     "mean": 0.846977,
+     "n": 20
+    }
+   },
+   "fcfs": {
+    "parking": {
+     "ci": 0.005247,
+     "mean": 0.701171,
+     "n": 20
+    },
+    "streetlight": {
+     "ci": 0.006559,
+     "mean": 0.675584,
+     "n": 20
+    },
+    "waste": {
+     "ci": 0.011404,
+     "mean": 0.672393,
+     "n": 20
+    },
+    "water": {
+     "ci": 0.006169,
+     "mean": 0.672072,
+     "n": 20
+    }
+   },
+   "tenantcap": {
+    "parking": {
+     "ci": 0.003086,
+     "mean": 0.853398,
+     "n": 20
+    },
+    "streetlight": {
+     "ci": 0.004667,
+     "mean": 0.845776,
+     "n": 20
+    },
+    "waste": {
+     "ci": 0.007682,
+     "mean": 0.841822,
+     "n": 20
+    },
+    "water": {
+     "ci": 0.005389,
+     "mean": 0.84698,
+     "n": 20
+    }
+   }
+  }
+ },
  "fig_defenses": {
   "dccheck": {
    "k32": {
@@ -60356,6 +60754,172 @@
     "n": 20
    }
   }
+ },
+ "honest_denied": {
+  "dccheck": {
+   "k32": {
+    "ci": 0.017737,
+    "mean": 0.460643
+   },
+   "none": {
+    "ci": 0.003463,
+    "mean": 0.035113
+   },
+   "sf7": {
+    "ci": 0.017556,
+    "mean": 0.687816
+   }
+  },
+  "dlguard": {
+   "k32": {
+    "ci": 0.003156,
+    "mean": 0.044048
+   },
+   "none": {
+    "ci": 0.003463,
+    "mean": 0.035113
+   },
+   "sf7": {
+    "ci": 0.003285,
+    "mean": 0.035123
+   }
+  },
+  "fcfs": {
+   "k32": {
+    "ci": 0.017737,
+    "mean": 0.460643
+   },
+   "none": {
+    "ci": 0.003463,
+    "mean": 0.035113
+   },
+   "sf7": {
+    "ci": 0.017556,
+    "mean": 0.687816
+   }
+  },
+  "ratelimit": {
+   "k32": {
+    "ci": 0.00992,
+    "mean": 0.101261
+   },
+   "none": {
+    "ci": 0.003463,
+    "mean": 0.035113
+   },
+   "sf7": {
+    "ci": 0.003722,
+    "mean": 0.036195
+   }
+  },
+  "rx2prefer": {
+   "k32": {
+    "ci": 0.022593,
+    "mean": 0.517551
+   },
+   "none": {
+    "ci": 0.002831,
+    "mean": 0.02129
+   },
+   "sf7": {
+    "ci": 0.004446,
+    "mean": 0.031324
+   }
+  },
+  "tenantcap": {
+   "k32": {
+    "ci": 0.003107,
+    "mean": 0.044326
+   },
+   "none": {
+    "ci": 0.003463,
+    "mean": 0.035113
+   },
+   "sf7": {
+    "ci": 0.003308,
+    "mean": 0.034989
+   }
+  },
+  "uplinkrate": {
+   "k32": {
+    "ci": 0.015517,
+    "mean": 0.207169
+   },
+   "none": {
+    "ci": 0.003463,
+    "mean": 0.035113
+   },
+   "sf7": {
+    "ci": 0.003295,
+    "mean": 0.035983
+   }
+  }
+ },
+ "honest_denied_bucket": {
+  "h2_b1": {
+   "ci": 0.004534,
+   "mean": 0.692076,
+   "n": 20
+  },
+  "h2_b3": {
+   "ci": 0.01007,
+   "mean": 0.075539,
+   "n": 20
+  },
+  "h2_b5": {
+   "ci": 0.003463,
+   "mean": 0.035113,
+   "n": 20
+  },
+  "h4_b1": {
+   "ci": 0.011926,
+   "mean": 0.461344,
+   "n": 20
+  },
+  "h4_b3": {
+   "ci": 0.003463,
+   "mean": 0.035113,
+   "n": 20
+  },
+  "h4_b5": {
+   "ci": 0.003463,
+   "mean": 0.035113,
+   "n": 20
+  },
+  "h8_b1": {
+   "ci": 0.012305,
+   "mean": 0.171101,
+   "n": 20
+  },
+  "h8_b3": {
+   "ci": 0.003463,
+   "mean": 0.035113,
+   "n": 20
+  },
+  "h8_b5": {
+   "ci": 0.003463,
+   "mean": 0.035113,
+   "n": 20
+  }
+ },
+ "live_server": {
+  "attacker_gated": 3,
+  "attacker_native": 530,
+  "attacker_uplinks": 773,
+  "downlinks_total": 540,
+  "honest_delivered_gated": 10,
+  "honest_delivered_native": 10,
+  "honest_devices": 10,
+  "rx1": 540,
+  "rx2": 0,
+  "server": "ChirpStack 4.19.2 (live, Semtech UDP)"
+ },
+ "overhead": {
+  "budget_try_acquire_ns_per_call": 524.9,
+  "calls": 1000000,
+  "complexity": "O(1) per downlink; one token-bucket refill and compare",
+  "detector_per_window": "O(devices): one count compare per device per 10-min window",
+  "note": "measured on the machine that ran make_figures; wall-clock, single thread"
  },
  "runtime": {
   "E10_compliant_sf": {

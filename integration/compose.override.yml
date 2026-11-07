@@ -1,0 +1,5 @@
+# Overlay for the official chirpstack-docker stack: pin the server image to the version the paper read
+# (v4.19.2) so the live test matches the source-code claims in Section 2.
+services:
+  chirpstack:
+    image: chirpstack/chirpstack:4.19.2
