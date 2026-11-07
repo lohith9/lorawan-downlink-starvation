@@ -6,7 +6,7 @@
 
 A simulator, a reference defense and the full experiment record for the paper
 **"Downlink Starvation in Shared LoRaWAN Cells: Attacks by Authenticated Devices and Per-Tenant Downlink Budgets"**
-(submitted to SysCom 2026).
+(accepted at SysCom 2026).
 
 Cities increasingly run one LoRaWAN network for many services. Every acknowledgment, MAC answer and command comes
 from the gateway's transmitter, which in EU868 may be on for only 1% of each hour in the RX1 sub-band and 10% in
@@ -28,6 +28,9 @@ that budget**, and it gives operators a way to measure the risk in their own dep
   detector, did best overall: closest to the no-attack level, or within 0.5 points of the best other setting, in
   every case the paper reports, including attackers holding a critical tenant's keys and cells with two or three
   gateways.
+- A **live check** against an unmodified ChirpStack v4.19.2 (`integration/`) confirms the mechanism on real server
+  software: one SF7 device drew 530 acknowledgments with no per-device limit, and the per-tenant budget capped it
+  to its bucket (3) while the honest devices were unaffected.
 
 ## Who this is for
 
@@ -96,6 +99,9 @@ tenant declared. The simulator's `tenantcap` policy and the reference implementa
 - `examples/`: `paper_default.json` and `city_8ch.json`, a template to edit.
 - `experiments/run_experiments.py`: every experiment in the paper (E1 to E19, X1 to X6); `make_figures.py` builds
   the figures and `results/numbers.json`, which holds every number quoted in the paper.
+- `integration/`: a live check against an unmodified ChirpStack v4.19.2. A virtual Semtech-UDP gateway drives the
+  real server, records the downlinks it schedules (RX1/RX2, no per-device limit) and enforces the per-tenant budget
+  at egress; `results_measured.json` holds the recorded run.
 - `diagrams/make_conf_architecture.py`: the paper's architecture figure, drawn from `numbers.json`.
 - `results/`: raw results of all runs. `figures/`: generated figures. `tests/`: unit and regression tests.
 
@@ -113,7 +119,7 @@ python experiments/make_figures.py
 
 ## Assumptions and limits
 
-All results come from simulation. The model has one to three gateways, treats SFs as orthogonal, keeps devices
+The headline results come from simulation; a live check against an unmodified ChirpStack server (`integration/`) confirms the mechanism and the fix on real server software. The model has one to three gateways, treats SFs as orthogonal, keeps devices
 static, uses no ADR, ignores downlink collisions and models EU868 only. `dl_link_check=True` checks every downlink
 against its link budget (gateway power per sub-band, receiver sensitivity at the downlink's SF): it leaves the
 default results unchanged, and it shows that RX2 at SF9 only helps if the gateway sends at the 27 dBm the RX2
@@ -123,7 +129,7 @@ sub-band allows. The paper's limitations section discusses each assumption.
 
 See `CITATION.cff`, or cite the archive: Andra, L. S., Ryan, B., Bondada, S., Goluguri, V. S., Andra, L. S. (2026).
 *Downlink Starvation in Shared LoRaWAN Cells: Simulator and Experiments.* Zenodo. doi:10.5281/zenodo.23424369 (all versions).
-The paper cites v1.1.1, doi:10.5281/zenodo.23426958.
+The paper cites v1.2.0, doi:10.5281/zenodo.23424369.
 
 ## Responsible use
 
